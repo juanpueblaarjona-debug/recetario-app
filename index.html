@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recetario de Juan</title>
+<meta name="theme-color" content="#C45634">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="robots" content="noindex">
+<style>
+  :root{--bg:#C45634;--bg2:#A84228;--cream:#FFF4E2;--ink:#3B1A10}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--cream);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:16px}
+  main{max-width:420px;width:100%;text-align:center}
+  img{width:120px;height:120px;border-radius:26px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  h1{font-size:26px;margin:18px 0 6px}
+  p{margin:6px 0;opacity:.92}
+  .btn{display:block;width:100%;margin:12px 0 0;padding:14px 16px;border-radius:12px;border:0;font:600 17px system-ui,sans-serif;cursor:pointer;text-decoration:none}
+  .primary{background:var(--cream);color:var(--ink)}
+  .ghost{background:transparent;color:var(--cream);border:2px solid rgba(255,244,226,.6)}
+  .help{margin-top:18px;font-size:14px;text-align:left;background:rgba(0,0,0,.14);border-radius:12px;padding:12px 14px}
+  .help b{display:block;margin-bottom:2px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <img src="icon-512.png" alt="">
+  <h1>Recetario de Juan</h1>
+  <p id="estado">Abriendo el recetario…</p>
+  <div id="panel" hidden>
+    <button class="btn primary" id="instalar" hidden>Instalar como aplicación</button>
+    <a class="btn primary" id="abrir" href="#">Abrir el recetario</a>
+    <div class="help" id="ayuda">
+      <b>Para instalarla</b>
+      En el móvil Android, con Chrome: menú ⋮ › «Instalar aplicación» o «Añadir a pantalla de inicio».<br>
+      En el ordenador, con Chrome o Edge: icono de instalar en la barra de direcciones, o menú › «Instalar Recetario».
+    </div>
+  </div>
+</main>
+<script>
+  const DESTINO = 'https://claude.ai/artifact/NVj3naPUEG8cGemci4XqkS';
+  document.getElementById('abrir').href = DESTINO;
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+  const instalada = window.matchMedia('(display-mode: standalone)').matches ||
+                    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+                    navigator.standalone === true;
+  if (instalada) {
+    // Abierta desde el icono: directa al recetario.
+    location.replace(DESTINO);
+  } else {
+    document.getElementById('estado').textContent = 'Instálala una vez y tendrás el recetario con su propio icono.';
+    document.getElementById('panel').hidden = false;
+    let aviso = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); aviso = e;
+      const b = document.getElementById('instalar'); b.hidden = false;
+      b.onclick = async () => { aviso.prompt(); await aviso.userChoice; aviso = null; b.hidden = true; };
+    });
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('estado').textContent = 'Instalada. Ábrela desde su icono.';
+      document.getElementById('instalar').hidden = true;
+    });
+  }
+</script>
+</body>
+</html>
